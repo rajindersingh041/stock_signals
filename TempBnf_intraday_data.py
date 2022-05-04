@@ -243,7 +243,7 @@ def abc(alice,myinstrument):
 
             sys.exit()
 
-    sleep(3)
+        sleep(3)
 
 
 if __name__ == "__main__":
