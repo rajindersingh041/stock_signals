@@ -93,15 +93,15 @@ def abc(alice,myinstrument):
     _60minsFile = [x for x in myfiles if "bnf" in x.lower() and "_60mins" in x.lower()]
     
     if len(_5minsFile) > 0:
-        old5mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}')
+        old5mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}',parse_dates=['index'])
         oldDf['5mins'] = old5mins.set_index('index').T.to_dict()
 
     if len(_15minsFile) > 0:
-        old15mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_15minsFile[0]}')
+        old15mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_15minsFile[0]}',parse_dates=['index'])
         oldDf['15mins'] = old15mins.set_index('index').T.to_dict()
 
     if len(_60minsFile) > 0:
-        old60mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_60minsFile[0]}')
+        old60mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_60minsFile[0]}',parse_dates=['index'])
         oldDf['60mins'] = old60mins.set_index('index').T.to_dict()
 
 
@@ -113,7 +113,7 @@ def abc(alice,myinstrument):
         ltt = get_current_ist()
         # market_start_time = ltt.replace(hour = 0,minute= 15,second = 0, microsecond=0)
         market_start_time = ltt.replace(hour = 9,minute= 15,second = 0, microsecond=0)
-        market_close_time = ltt.replace(hour = 21,minute=30 ,second = 30, microsecond=0)
+        market_close_time = ltt.replace(hour = 23,minute=30 ,second = 30, microsecond=0)
 
         if ltt >= market_start_time and ltt <= market_close_time:
 
@@ -170,14 +170,10 @@ def abc(alice,myinstrument):
             except:
               logger.error('Issue in tick to candle')
             
-            mydf5mins = pd.DataFrame.from_dict(candles_5[instrument]).T.reset_index()
-            mydf15mins = pd.DataFrame.from_dict(candles_15[instrument]).T.reset_index()
-            mydf60mins = pd.DataFrame.from_dict(candles_60[instrument]).T.reset_index()
+            mydf5mins = pd.DataFrame.from_dict(candles_5[instrument]).T.sort_index().reset_index()
+            mydf15mins = pd.DataFrame.from_dict(candles_15[instrument]).T.sort_index().reset_index()
+            mydf60mins = pd.DataFrame.from_dict(candles_60[instrument]).T.sort_index().reset_index()
             
-            # if "5mins" in oldDf and "15mins" in oldDf and "60mins" in oldDf:
-            #     mydf5mins = pd.concat([oldDf['5mins'],mydf5mins])
-            #     mydf15mins = pd.concat([oldDf['15mins'],mydf15mins])
-            #     mydf60mins = pd.concat([oldDf['60mins'],mydf60mins])
 
             mydf5mins['rsi'] = pta.rsi(mydf5mins['close'],3)
             mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],3)
@@ -202,7 +198,7 @@ def abc(alice,myinstrument):
 
 
 
-        if get_current_ist() >= get_current_ist().replace(hour=21,minute=30,second=0, microsecond = 0):
+        if get_current_ist() >= get_current_ist().replace(hour=23,minute=30,second=0, microsecond = 0):
         # if get_current_ist() >= get_current_ist().replace(hour=15,minute=30,second=0, microsecond = 0):
             #check if existing files exist
 
