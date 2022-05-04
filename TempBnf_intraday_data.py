@@ -72,7 +72,7 @@ def abc(alice,myinstrument):
                         socket_open_callback=open_callback,
                         run_in_background=True)
 
-    alice.subscribe(alice.get_instrument_by_symbol('MCX', myinstrument), LiveFeedType.MARKET_DATA)
+    alice.subscribe(alice.get_instrument_by_symbol('NSE', myinstrument), LiveFeedType.MARKET_DATA)
     logger.info('Alice Subs')
 
     sleep(0.5)
@@ -113,7 +113,7 @@ def abc(alice,myinstrument):
         ltt = get_current_ist()
         # market_start_time = ltt.replace(hour = 0,minute= 15,second = 0, microsecond=0)
         market_start_time = ltt.replace(hour = 9,minute= 15,second = 0, microsecond=0)
-        market_close_time = ltt.replace(hour = 23,minute=30 ,second = 30, microsecond=0)
+        market_close_time = ltt.replace(hour = 15,minute=32 ,second = 30, microsecond=0)
 
         if ltt >= market_start_time and ltt <= market_close_time:
 
@@ -175,9 +175,9 @@ def abc(alice,myinstrument):
             mydf60mins = pd.DataFrame.from_dict(candles_60[instrument]).T.sort_index().reset_index()
             
 
-            mydf5mins['rsi'] = pta.rsi(mydf5mins['close'],3)
-            mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],3)
-            mydf60mins['rsi'] = pta.rsi(mydf60mins['close'],3)
+            mydf5mins['rsi'] = pta.rsi(mydf5mins['close'],14)
+            mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],14)
+            mydf60mins['rsi'] = pta.rsi(mydf60mins['close'],14)
 
             # print(mydf5mins.tail(3))
 
@@ -197,46 +197,10 @@ def abc(alice,myinstrument):
                 pass
 
 
-
-        if get_current_ist() >= get_current_ist().replace(hour=23,minute=30,second=0, microsecond = 0):
-        # if get_current_ist() >= get_current_ist().replace(hour=15,minute=30,second=0, microsecond = 0):
-            #check if existing files exist
-
+        if get_current_ist() >= get_current_ist().replace(hour=15,minute=32,second=0, microsecond = 0):
             mydf5mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_5mins.csv',index=False)
             mydf15mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_15mins.csv',index=False)
             mydf60mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_60mins.csv',index=False)
-
-            # myfiles = os.listdir('/home/ubuntu/myIntraday_files/')
-            # _5minsFile = [x for x in myfiles if "bnf" in x.lower() and "_5mins" in x.lower()]
-            # _15minsFile = [x for x in myfiles if "bnf" in x.lower() and "_15mins" in x.lower()]
-            # _60minsFile = [x for x in myfiles if "bnf" in x.lower() and "_60mins" in x.lower()]
-
-            # if len(_5minsFile) > 0:
-            #     myexisting5mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}')
-            #     myexisting5mins = pd.concat([myexisting5mins, mydf5mins])
-            #     myexisting5mins.to_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}')
-
-            # else:
-            #     mydf5mins.reset_index().to_csv(f'/home/ubuntu/myIntraday_files/bnf_5mins.csv',index=False)
-            
-            # if len(_15minsFile) > 0:
-            #     logger.info(_15minsFile[0])
-            #     myexisting15mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_15minsFile[0]}')
-            #     myexisting15mins = pd.concat([myexisting15mins, mydf15mins])
-            #     myexisting15mins.to_csv(f'/home/ubuntu/myIntraday_files/{_15minsFile[0]}')
-
-            # else:
-            #     mydf15mins.reset_index().to_csv(f'/home/ubuntu/myIntraday_files/bnf_15mins.csv',index=False)
-
-
-            # if len(_60minsFile) > 0:
-            #     logger.info(_60minsFile[0])
-            #     myexisting60mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_60minsFile[0]}')
-            #     myexisting60mins = pd.concat([myexisting60mins, mydf60mins])
-            #     myexisting60mins.to_csv(f'/home/ubuntu/myIntraday_files/{_60minsFile[0]}')
-            # else:
-            #     mydf60mins.reset_index().to_csv(f'/home/ubuntu/myIntraday_files/bnf_60mins.csv',index=False)
-
             sys.exit()
 
         sleep(3)
@@ -245,7 +209,7 @@ def abc(alice,myinstrument):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = getLogger(__name__)
-    instrument = 'CRUDEOIL MAY FUT'
+    instrument = 'Nifty Bank'
     tickdata = {}
     myfilepath = '/home/ubuntu/mycreds.json'
 
