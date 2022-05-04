@@ -1,0 +1,6 @@
+pandas
+alice_blue
+kaggle
+pytz
+pandas_ta
+tabula_py
