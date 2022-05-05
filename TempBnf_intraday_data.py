@@ -10,7 +10,7 @@ import pandas_ta as pta
 import numpy as np
 import os
 from pytz import timezone
-import psutil
+# import psutil
 
 # gives a single float value
 
@@ -88,9 +88,11 @@ def abc(alice,myinstrument,myExchangeGiven):
 
     oldDf = {}
     myfiles = os.listdir('/home/ubuntu/myIntraday_files/')
-    _5minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_5mins" in x.lower()]
-    _15minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_15mins" in x.lower()]
-    _60minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_60mins" in x.lower()]
+    InstruName = myinstrument.replace(' ','_')
+
+    _5minsFile = [x for x in myfiles if f"{InstruName}" in x.lower() and "_5mins" in x.lower()]
+    _15minsFile = [x for x in myfiles if f"{InstruName}" in x.lower() and "_15mins" in x.lower()]
+    _60minsFile = [x for x in myfiles if f"{InstruName}" in x.lower() and "_60mins" in x.lower()]
     
     if len(_5minsFile) > 0:
         old5mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}',parse_dates=['index'])
@@ -113,7 +115,7 @@ def abc(alice,myinstrument,myExchangeGiven):
         ltt = get_current_ist()
         # market_start_time = ltt.replace(hour = 0,minute= 15,second = 0, microsecond=0)
         market_start_time = ltt.replace(hour = 9,minute= 15,second = 0, microsecond=0)
-        market_close_time = ltt.replace(hour = 15,minute=32 ,second = 30, microsecond=0)
+        market_close_time = ltt.replace(hour = 15,minute=29 ,second = 59, microsecond=0)
 
         if ltt >= market_start_time and ltt <= market_close_time:
 
@@ -175,36 +177,25 @@ def abc(alice,myinstrument,myExchangeGiven):
             mydf60mins = pd.DataFrame.from_dict(candles_60[instrument]).T.sort_index().reset_index()
             
 
-            mydf5mins['rsi'] = pta.rsi(mydf5mins['close'],14)
-            mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],14)
-            mydf60mins['rsi'] = pta.rsi(mydf60mins['close'],14)
-
-            # print(mydf5mins.tail(3))
-
-            # if mydf5mins.shape[0] > 2 and mydf15mins.shape[0] > 2 and mydf60mins.shape[0] > 2 and buy_signal == False /
-            #     and mydf5mins.iloc[-2]['rsi'] is not None and mydf15mins.iloc[-2]['rsi'] is not None and mydf60mins.iloc[-2]['rsi'] is not None:
-            #     if mydf5mins.iloc[-2]['rsi'] < 40 and mydf15mins.iloc[-2]['rsi'] >= 60 and mydf60mins.iloc[-2]['rsi'] >= 60:
-            #         logger.info('Good opportunity to buy')
-            #         buy_signal = True
-
-            # if buy_signal:
-            #     stoploss = mydf5mins.iloc[-2]['close']
-            #     buy_ltp_signal = tickdata['ltp']
-
-            #     print(stoploss,buy_ltp_signal)
-                #order sell
-
-            if sell_signal:
-                pass
+            mydf5mins['rsi'] = pta.rsi(mydf5mins['close'],14).fillna(-1)
+            mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],14).fillna(-1)
+            mydf60mins['rsi'] = pta.rsi(mydf60mins['close'],14).fillna(-1)
 
 
-        if get_current_ist() >= get_current_ist().replace(hour=15,minute=32,second=0, microsecond = 0):
-            mydf5mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_5mins.csv',index=False)
-            mydf15mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_15mins.csv',index=False)
-            mydf60mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_60mins.csv',index=False)
+            if mydf60mins.iloc[-1]['rsi'] >= 60 and mydf15mins.iloc[-1]['rsi'] >= 60 and mydf5mins.iloc[-1]['rsi'] <= 40:
+                logger.info('Buy')
+            elif mydf60mins.iloc[-1]['rsi'] <= 40 and mydf15mins.iloc[-1]['rsi'] <= 40 and mydf5mins.iloc[-1]['rsi'] >= 60:
+                logger.info('Sell')
+
+
+        if get_current_ist() >= get_current_ist().replace(hour=15,minute=29,second=59, microsecond = 0):
+            InstruName = myinstrument.replace(' ','_')
+            mydf5mins.to_csv(f'/home/ubuntu/myIntraday_files/{InstruName}_5mins.csv',index=False)
+            mydf15mins.to_csv(f'/home/ubuntu/myIntraday_files/{InstruName}_15mins.csv',index=False)
+            mydf60mins.to_csv(f'/home/ubuntu/myIntraday_files/{InstruName}_60mins.csv',index=False)
             sys.exit()
 
-        sleep(2)
+        sleep(1)
 
 
 if __name__ == "__main__":
