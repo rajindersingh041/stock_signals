@@ -202,8 +202,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = getLogger(__name__)
     
-    myexchange, instrument = 'MCX', 'CRUDEOIL MAY FUT'
-    # myexchange, instrument = 'NSE', 'Nifty Bank'
+    #myexchange, instrument = 'MCX', 'CRUDEOIL MAY FUT'
+    myexchange, instrument = 'NSE', 'Nifty Bank'
     tickdata = {}
     myfilepath = '/home/ubuntu/mycreds.json'
 
