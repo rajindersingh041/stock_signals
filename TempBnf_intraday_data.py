@@ -181,11 +181,13 @@ def abc(alice,myinstrument,myExchangeGiven):
             mydf15mins['rsi'] = pta.rsi(mydf15mins['close'],14).fillna(-1)
             mydf60mins['rsi'] = pta.rsi(mydf60mins['close'],14).fillna(-1)
 
-
-            if mydf60mins.iloc[-1]['rsi'] >= 60 and mydf15mins.iloc[-1]['rsi'] >= 60 and mydf5mins.iloc[-1]['rsi'] <= 40:
-                logger.info('Buy')
-            elif mydf60mins.iloc[-1]['rsi'] <= 40 and mydf15mins.iloc[-1]['rsi'] <= 40 and mydf5mins.iloc[-1]['rsi'] >= 60:
-                logger.info('Sell')
+            try:
+                if mydf60mins.iloc[-2]['rsi'] >= 60 and mydf15mins.iloc[-2]['rsi'] >= 60 and mydf5mins.iloc[-2]['rsi'] <= 40:
+                    logger.info('Buy')
+                elif mydf60mins.iloc[-2]['rsi'] <= 40 and mydf15mins.iloc[-2]['rsi'] <= 40 and mydf5mins.iloc[-2]['rsi'] >= 60:
+                    logger.info('Sell')
+            except:
+                logger.error('candle stick data not complete')
 
 
         if get_current_ist() >= get_current_ist().replace(hour=15,minute=29,second=59, microsecond = 0):
