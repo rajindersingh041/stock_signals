@@ -51,7 +51,7 @@ def getLogger(name):
     return log
 
 
-def abc(alice,myinstrument):
+def abc(alice,myinstrument,myExchangeGiven):
     socket_opened = False
 
 
@@ -72,8 +72,8 @@ def abc(alice,myinstrument):
                         socket_open_callback=open_callback,
                         run_in_background=True)
 
-    alice.subscribe(alice.get_instrument_by_symbol('NSE', myinstrument), LiveFeedType.MARKET_DATA)
-    logger.info('Alice Subs')
+    alice.subscribe(alice.get_instrument_by_symbol(f'{myExchangeGiven}', myinstrument), LiveFeedType.MARKET_DATA)
+    logger.info(f'Alice Subs {myExchangeGiven} - {myinstrument}')
 
     sleep(0.5)
 
@@ -88,9 +88,9 @@ def abc(alice,myinstrument):
 
     oldDf = {}
     myfiles = os.listdir('/home/ubuntu/myIntraday_files/')
-    _5minsFile = [x for x in myfiles if "bnf" in x.lower() and "_5mins" in x.lower()]
-    _15minsFile = [x for x in myfiles if "bnf" in x.lower() and "_15mins" in x.lower()]
-    _60minsFile = [x for x in myfiles if "bnf" in x.lower() and "_60mins" in x.lower()]
+    _5minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_5mins" in x.lower()]
+    _15minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_15mins" in x.lower()]
+    _60minsFile = [x for x in myfiles if f"{myinstrument}" in x.lower() and "_60mins" in x.lower()]
     
     if len(_5minsFile) > 0:
         old5mins = pd.read_csv(f'/home/ubuntu/myIntraday_files/{_5minsFile[0]}',parse_dates=['index'])
@@ -117,9 +117,9 @@ def abc(alice,myinstrument):
 
         if ltt >= market_start_time and ltt <= market_close_time:
 
-            ltt_min_5 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//1 * 1)
-            ltt_min_15 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//2 * 2)
-            ltt_min_60 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//3 * 3) + timedelta(minutes = 15)
+            ltt_min_5 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//5 * 5)
+            ltt_min_15 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//15 * 15)
+            ltt_min_60 = datetime(ltt.year,ltt.month,ltt.day,ltt.hour,ltt.minute//60 * 60) + timedelta(minutes = 15)
 
             try:
               if ltt_min_5 in candles_5[instrument]:
@@ -181,16 +181,17 @@ def abc(alice,myinstrument):
 
             # print(mydf5mins.tail(3))
 
-            if mydf5mins.shape[0] > 2 and mydf15mins.shape[0] > 2 and mydf60mins.shape[0] > 2 and buy_signal == False:
-                if mydf5mins.iloc[-2]['rsi'] < 40 and mydf15mins.iloc[-2]['rsi'] >= 60 and mydf60mins.iloc[-2]['rsi'] >= 60:
-                    logger.info('Good opportunity to buy')
-                    buy_signal = True
+            # if mydf5mins.shape[0] > 2 and mydf15mins.shape[0] > 2 and mydf60mins.shape[0] > 2 and buy_signal == False /
+            #     and mydf5mins.iloc[-2]['rsi'] is not None and mydf15mins.iloc[-2]['rsi'] is not None and mydf60mins.iloc[-2]['rsi'] is not None:
+            #     if mydf5mins.iloc[-2]['rsi'] < 40 and mydf15mins.iloc[-2]['rsi'] >= 60 and mydf60mins.iloc[-2]['rsi'] >= 60:
+            #         logger.info('Good opportunity to buy')
+            #         buy_signal = True
 
-            if buy_signal:
-                stoploss = mydf5mins.iloc[-2]['close']
-                buy_ltp_signal = tickdata['ltp']
+            # if buy_signal:
+            #     stoploss = mydf5mins.iloc[-2]['close']
+            #     buy_ltp_signal = tickdata['ltp']
 
-                print(stoploss,buy_ltp_signal)
+            #     print(stoploss,buy_ltp_signal)
                 #order sell
 
             if sell_signal:
@@ -198,21 +199,23 @@ def abc(alice,myinstrument):
 
 
         if get_current_ist() >= get_current_ist().replace(hour=15,minute=32,second=0, microsecond = 0):
-            mydf5mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_5mins.csv',index=False)
-            mydf15mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_15mins.csv',index=False)
-            mydf60mins.to_csv(f'/home/ubuntu/myIntraday_files/bnf_60mins.csv',index=False)
+            mydf5mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_5mins.csv',index=False)
+            mydf15mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_15mins.csv',index=False)
+            mydf60mins.to_csv(f'/home/ubuntu/myIntraday_files/{myinstrument}_60mins.csv',index=False)
             sys.exit()
 
-        sleep(3)
+        sleep(2)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = getLogger(__name__)
-    instrument = 'Nifty Bank'
+    
+    myexchange, instrument = 'MCX', 'CRUDEOIL MAY FUT'
+    # myexchange, instrument = 'NSE', 'Nifty Bank'
     tickdata = {}
     myfilepath = '/home/ubuntu/mycreds.json'
 
     myalice = run_alice_blue(myfilepath)
-    abc(myalice,instrument)
+    abc(myalice,instrument,myexchange)
 
